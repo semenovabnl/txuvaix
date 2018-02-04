@@ -1,34 +1,161 @@
-Alphabet
-  а ӑ е ё ӗ и о у ӳ ы э ю я б в г д ж з к л м н п р с ҫ т ф х ц ч ш щ й ь ъ
-  А Ӑ Е Ё Ӗ И О У Ӳ Ы Э Ю Я Б В Г Д Ж З К Л М Н П Р С Ҫ Т Ф Х Ц Ч Ш Щ Й Ь Ъ 
- %{A%}:а %{A%}:е
- %{Ă%}:ӑ %{Ă%}:ӗ %{Ă%}:0
- %{м%}:м %{м%}:0
+Alphabet							
+  а ӑ е ё ӗ и о у ӳ ы э ю я б в г д ж з к л м н п р с ҫ т ф х ц ч ш щ й ь ъ							
+  А Ӑ Е Ё Ӗ И О У Ӳ Ы Э Ю Я Б В Г Д Ж З К Л М Н П Р С Ҫ Т Ф Х Ц Ч Ш Щ Й Ь Ъ							
+ %{A%}:а %{A%}:е							
+ %{Ă%}:ӑ %{Ă%}:ӗ %{Ă%}:0							
+ %{м%}:м %{м%}:0 %{м%}:н							
+ %{н%}:н %{н%}:0							
+ %{р%}:р %{р%}:т %{р%}:ч							
+ %{ъ%}:0							
+ %{ь%}:0							
+ %{я%}:0 %{я%}:йӑ %{я%}:йӗ							
+ %{э%}:ӑ %{э%}:ӗ %{э%}:0							
+ %{У%}:у %{У%}:ю %{У%}:ӳ							
+ %{С%}:0							
+ %{Н%}:н %{Н%}:0							
+ %{Е%}:ӗ %{Е%}:и							
+;							
+							
+							
+Sets							
+							
+BackVow = ӑ а ы о у я ё ю ;							
+							
+FrontVow = е ӗ э и ӳ ;							
+							
+Vow = ӑ а ы о у я ё ю е ӗ э и ӳ ;							
+							
+ArchiBack = %{ъ%} ;							
+							
+Cns = б в г д ж з к л м н п р с ҫ т ф х ц ч ш щ й ъ ;							
+							
+ArchiCns = %{м%} %{н%} %{р%}  %{С%} ;							
+							
+							
 
-;
-
-Sets 
-
-BackVow = ӑ а ы о у я ё ю ;
-
-FrontVow = ӗ э и ӳ ; 
-
-Cns = б в г д ж з к л м н п р с ҫ т ф х ц ч ш щ й ь ъ ; 
-
-ArchiCns = %{м%} ;
-
-Rules 
-
-"Remove morpheme boundary"
-%>:0 <=> _ ;
-
-"Back vowel harmony for archiphoneme {A}"
-%{A%}:а <=> BackVow: [ Cns: | %>: ]+ _ ; 
-
-"Back vowel harmony for archiphoneme {Ă}"
-%{Ă%}:ӑ <=> BackVow: [ ArchiCns: | Cns: | %>: ]+ _ ;
-        except
-                                     %{м%}: %>:  _ н ; 
-
-"Non surface {Ã} in plural genitive"
-%{Ă%}:0 <=> %{м%}: %>: _ н ; 
+Rules							
+							
+"Remove morpheme boundary"							
+%>:0 <=> _ ;							
+							
+"Back vowel harmony for archiphoneme {A}"							
+%{A%}:а <=> [ BackVow: | ArchiBack: ] [ ArchiCns: | Cns: | %{э%}: | %{я%}: | %{ь%}: | %{Ă%}: | %{У%}: %{Н%}: | %>: ]+ _ ;							
+							
+							
+"Back vowel harmony for archiphoneme {Ă}"							
+%{Ă%}:ӑ <=> [ BackVow: | ArchiBack: ] [ ArchiCns: | Cns: | %{э%}: | %{я%}: | %{ь%}: | %{Ă%}: | %{У%}: %{Н%}: | %>: ]+ _ ;							
+        except							
+				[ %{м%}: | BackVow: | FrontVow: | %{э%}: | %{я%}: | %{ь%}: | %{У%}: %{Н%}: ] %>: _ [ н | м ] ;			
+							
+							
+"No surface {Ă} in plural genetive  or after a vowel in stem"							
+%{Ă%}:0 <=> [ BackVow: | FrontVow: | %{м%}: | %{я%}: | %{э%}: | и й: | %{Н%}: ] [ %{ь%}: ]* %>: _ [ н | м ];							
+	except						
+		и: [ й: ]* %>: _ м ; !Possessive for шаши, информаци					
+							
+							
+							
+"No surface {м} in plural genetive and dative"							
+%{м%}:0 <=> _ %>: [ %{н%}: | %{Ă%}: н ] ;							
+							
+"Surface {м} as н in plural locative and ablative"							
+%{м%}:н <=> _ %>: %{р%}: %{A%}: ;							
+							
+"Surface {р} as т after and  in locative and ablative px2sg"							
+ %{р%}:т <=> р %>: _ %{A%}: ;							
+		%{У%}: %{Н%}: %>: _ ;				
+							
+"Remove duplicate consonant in cases"							
+Cons:0 <=> Cons _ %>: ;							
+!	except						
+!			й _ %>: %{У%}: ;				
+	where Cons in Cns ;						
+													
+							
+							
+"ьӑ"							
+я:ьӑ <=> _  %{ь%}: %>: ;							
+	except						
+		_ %{ь%}: %>: %{У%}: ; !Женя					
+							
+"Remove ь before vowel in affix or remove duplicate ь"							
+ь:0 <=> _ я: %{ь%}: %>: ; ! Наталья							
+	_ %>: [ %{Ă%}: | %{A%}: | %{У%}: ] ;						
+	_ е: %{я%}: %>: ; ! платье						
+	except						
+		_ я: %{ь%}: %>: %{У%}: ;					
+							
+"Remove vowel in stem before affix"							
+V:0 <=> _ [ %{э%}: | %{я%}: ] %>: ;	
+	    _ %>: [ %{У%}: | %{Е%}: | %{Ă%}: р ];
+	    _ %{я%}: %>: %{У%}: ;					
+		_ %{ь%}: %>: %{У%}: ; !Женя							
+	except						
+		_  %{я%}:0 %>: ;					
+		_ %{я%}: %>: %{У%}: ;					
+	where V in Vow ;						
+				
+							
+"No surface {я} in nominative and px1sg after е"							
+%{я%}:0 <=> _ #;							
+		_ %>: %{У%}: ;					
+!	   е: _ %>: %{Ă%}: м ;  !платье						
+							
+"Back vowel harmony for archiphoneme {я}"							
+%{я%}:йӑ <=> BackVow: _ %>: ;							
+	except						
+		 _ %>: %{У%}: ;					
+							
+							
+"No surface {э} in nominative"							
+%{э%}:0 <=> _ # ;							
+		_ %>:[ %{У%}: | %{Е%}: ] ;					
+							
+"Back vowel harmony for archiphoneme {э}"							
+%{э%}:ӑ <=> BackVow: _ %>: ;							
+	except						
+		 _ %>:[ %{У%}: | %{Е%}: ];					
+							
+"Duplicate consonants in 1-2 syllables in genetive and px1sg/px3sp"							
+%{С%}:C <=> C _ [ Vow: ]* %>: [ %{Ă%}: | %{A%}: | %{У%}: | %{Е%}: ] ; where C in Cns ;							
+							
+"Remove surface {н} in affix after a consonant"	!Dative						
+%{н%}:0 <=> C: %>: _  ;							
+			where C in Cns ;				
+							
+"Remove surface {й} at the end of the stem after и"							
+!Золотницкий							
+й:0 <=> и _ %>: ;							
+	!	_ %>: %{У%}: ;					
+	except 
+		и _ %>: %{Ă%}: м ; !px1sg					
+		и _ %>: %{У%}: ;					
+							
+"Add й after и in Possessive 1sg"							
+и:ий <=> _ %>: %{Ă%}: м ;							
+		! _ %>: %{У%}: ;					
+							
+"Surface {ч} in dative plural and px3sp abl/loc"							
+%{р%}:ч <=> %{м%}: %>: _ ;
+	    %{Е%}: %{Н%}: %>: _ ;							
+							
+"No surface ҫ in nominative"							
+!власть							
+ҫ:сть <=> _ # ;							
+																
+							
+"Back vowel а, ӑ, о  harmony for archiphoneme {У}"							
+%{У%}:у <=> [ а: | ӑ: | о: ] [ Cns: | ArchiCns: | %{э%}: | %>: ]+ _ ;							
+	except	
+		[ а: | ӑ: | о: ] й: %>: _ ;					
+							
+"Back vowel я and й  harmony for archiphoneme {У}"							
+%{У%}:ю <=>  [ я: | ArchiBack: ] [ %{я%}: | %{ь%}: ]* %>: _ ;							
+	    [ а: | ӑ: | о: ] й: %>: _ ;						
+							
+"{н} in abl/loc affix in px2sg and px3sp"							
+ %{Н%}:н <=> [ %{У%}: | %{Е%}: ] _ %>: %{р%}: ;							
+							
+"Surface {E} as [e] in px3sp"							
+%{Е%}:ӗ <=> C: %>: _ ;							
+		where C in Cns ;					
